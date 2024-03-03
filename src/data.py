@@ -10,42 +10,6 @@ import numpy as np
 import tqdm
 from datetime import datetime, timedelta
 
-def rename_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Rename columns of a DataFrame to a consistent format."""
-
-    cols = df.columns
-    processed_columns = [col.lower().replace(' ', '_') for col in cols]
-    processed_columns = [col.lower().replace('?', '') for col in processed_columns]
-    df.rename(columns=dict(zip(df.columns, processed_columns)), inplace=True)
-    df.rename(columns={'is_fraud': 'fraud'}, inplace=True)
-    return df
-
-def reformat_feature_values(df: pd.DataFrame) -> pd.DataFrame:
-    """Reformat the columns of a DataFrame to the appropriate data types."""
-    
-    df['fraud'] = df['fraud'].map({'Yes': True, 'No': False})
-    df['use_chip'] = df['use_chip'].str.replace(' ','_').str.lower()
-    df['errors'] = df['errors'].fillna('no_error').str.replace(' ','_').str.lower()
-    df['merchant_state'] = df['merchant_state'].fillna('online').str.replace(' ','_').str.lower()
-    df['amount'] = df['amount'].replace({'\$': '', ',': ''}, regex=True).astype(float)
-    
-    return df
-
-
-def create_other_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Create features based on the original columns of the DataFrame."""
-    
-    # Create a new feature based on the amount
-    df['amount_log'] = np.log(df['amount'] + 1)
-    
-    # Create a new feature based on the date
-    df['day_week'] = df['date'].dt.dayofweek
-    df['hour'] = df['time'].str[:2].astype(int)
-    df['foreign_transaction'] = df['merchant_state'].apply(lambda x: True if x != 'online' and len(str(x)) > 2 else False)
-    df['morning'] = df['hour'].apply(lambda x: True if (x >= 9) & (x < 12) else False)
-    df['afternoon'] = df['hour'].apply(lambda x: True if (x >= 12) & (x < 18) else False)
-
-    return df
 
 def calculate_rfm_for_client(
                              df: pd.DataFrame, 
@@ -113,20 +77,74 @@ def preprocess_data(df: pd.DataFrame,
                     year: int,  # Year of the dataset for modeling
                     time_delta: int,  # Lag time for RFM features 
                     drop_cols: Optional[List[str]]) -> pd.DataFrame:
-    """Preprocess the credit card transactions dataset."""
-       
+    """
+    Preprocess the credit card transactions dataset.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input data frame to be preprocessed. It should contain credit card transaction data.
+    year : int
+        The year of the dataset for modeling. This is used to filter the data and calculate features.
+    time_delta : int
+        The lag time for RFM (Recency, Frequency, Monetary) features. This is used in the calculation of RFM features.
+    drop_cols : Optional[List[str]]
+        A list of column names to be dropped from the data frame. If None, no columns will be dropped.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        The preprocessed data frame. It has renamed columns, reformatted feature values, filtered transactions, 
+        a single datetime column, and calculated RFM features.
+
+    Notes
+    -----
+    The function performs the following steps:
+    1. Renames the columns using the `rename_columns` function.
+    2. Reformats the feature values using the `reformat_feature_values` function.
+    3. Filters out transactions with non-positive amounts and drops specified columns.
+    4. Converts the date and time columns to a single datetime column.
+    5. Filters the data based on the specified year and a 90-day period before the first day of that year.
+    6. Calculates the RFM features using the `calculate_rfm` function with the specified time window.
+    7. Creates other features using the `create_other_features` function.
+    8. Filters the data based on the specified year.
+    """
+     
     # Rename the columns
-    df = rename_columns(df)
+    df = df.copy()
+    cols = df.columns
+    processed_columns = [col.lower().replace(' ', '_') for col in cols]
+    processed_columns = [col.lower().replace('?', '') for col in processed_columns]
+    df.rename(columns=dict(zip(df.columns, processed_columns)), inplace=True)
+    df.rename(columns={'is_fraud': 'fraud'}, inplace=True)
     
     # Reformat the feature values
-    df = reformat_feature_values(df)
+    df['fraud'] = df['fraud'].map({'Yes': True, 'No': False})
+    df['use_chip'] = df['use_chip'].str.replace(' ','_').str.lower()
+    df['errors'] = df['errors'].fillna('no_error').str.replace(' ','_').str.lower()
+    df['merchant_state'] = df['merchant_state'].fillna('online').str.replace(' ','_').str.lower()
+    df['amount'] = df['amount'].replace({'\$': '', ',': ''}, regex=True).astype(float)
+    
+    # Create a features based on the amount and merchant_state
+    df = df[df['amount']>0]
+    df['amount_log'] = np.log(df['amount'] + 1)
+    df['foreign_transaction'] = df['merchant_state'].apply(lambda x: True if x != 'online' and len(str(x)) > 2 else False)
+    
+    # Create a new features based on the date
+    df['date'] = pd.to_datetime(df[['year', 'month', 'day']])
+    df['day_week'] = df['date'].dt.dayofweek
+    df['hour'] = df['time'].apply(lambda x: int(x.split(':')[0]))
+    df['minute'] = df['time'].apply(lambda x: int(x.split(':')[1]))
+    df['morning'] = df['hour'].apply(lambda x: True if (x >= 9) & (x < 12) else False)
+    df['afternoon'] = df['hour'].apply(lambda x: True if (x >= 12) & (x < 18) else False)
+    df['full_date'] = pd.to_datetime(df[['year', 'month', 'day','hour','minute']])
     
     # Filter out transactions with non-positive amounts and drop columns
-    df = df[df['amount']>0]
+
     df.drop(drop_cols, axis=1, inplace=True)
     
     # Convert the date and time columns to a single datetime column
-    df['date'] = pd.to_datetime(df[['year', 'month', 'day']])
+    
     
     # Create a datetime object for the first day of the year
     first_day_year = datetime(year, 1, 1)
@@ -141,7 +159,6 @@ def preprocess_data(df: pd.DataFrame,
     
     # Calculate the RFM features
     df = calculate_rfm(df, time_window=time_delta)
-    df = create_other_features(df)
     
     df = df[df['year'] == year]
     
