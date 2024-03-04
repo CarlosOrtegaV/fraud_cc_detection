@@ -1,7 +1,7 @@
 from pathlib import Path
 import requests
 
-from src.paths import RAW_DATA_DIR
+from src.paths import RAW_DATA_DIR, PREPROCESSED_DATA_DIR
 
 from typing import List, Tuple, Optional
 
@@ -73,10 +73,12 @@ def calculate_rfm(
     
     return df
 
-def preprocess_data(df: pd.DataFrame,
+def preprocess_data(
+                    df: pd.DataFrame,
                     year: int,  # Year of the dataset for modeling
                     time_delta: int,  # Lag time for RFM features 
-                    drop_cols: Optional[List[str]]) -> pd.DataFrame:
+                    drop_cols: Optional[List[str]]
+                    ) -> pd.DataFrame:
     """
     Preprocess the credit card transactions dataset.
 
@@ -176,3 +178,27 @@ def download_dataset() -> Path:
         return path
     else:
         raise Exception("Failed to download CSV file. Status code:", response.status_code)
+    
+
+def fetch_batch_data(
+                     from_date: datetime, 
+                     to_date: datetime
+                     ) -> pd.DataFrame:
+    """
+    Simulate production data by sampling historical data from 23 years ago.
+    """
+    
+    df = pd.read_parquet( PREPROCESSED_DATA_DIR / 'full_data_2000_2005.parquet')
+    
+    df_filtered = df.copy()
+    
+    years_shift = 23  # how many years to go back in time
+
+    fetch_data_to_ = to_date.replace(year=to_date.year - years_shift)
+    fetch_data_from_ = from_date.replace(year=from_date.year - years_shift)
+    print(f'{fetch_data_from_=}, {fetch_data_to_=}')
+    
+    
+    df_filtered = df_filtered[(df_filtered['full_date'] >= fetch_data_from_) & (df_filtered['full_date'] < fetch_data_to_)]
+
+    return df_filtered
