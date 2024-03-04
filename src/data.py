@@ -178,7 +178,18 @@ def download_dataset() -> Path:
         return path
     else:
         raise Exception("Failed to download CSV file. Status code:", response.status_code)
+
+def download_parquet_dataset() -> pd.DataFrame:
+    """Download a Parquet dataset from a URL and save it to the local directory."""
     
+    URL = 'https://www.dropbox.com/scl/fi/65p2ox1uafn2838hbjk9z/full_data_2000_2005.parquet?rlkey=k6pzj2b1eb0fs7ml7zr5e1sz1&dl=1'
+    response = requests.get(URL)
+    if response.status_code == 200:
+        path = Path(PREPROCESSED_DATA_DIR / 'full_data_2000_2005.parquet')
+        open(path, 'wb').write(response.content)
+        return path
+    else:
+        raise Exception("Failed to download Parquet file. Status code:", response.status_code)
 
 def fetch_batch_data(
                      from_date: datetime, 
@@ -187,10 +198,16 @@ def fetch_batch_data(
     """
     Simulate production data by sampling historical data from 23 years ago.
     """
-    
-    df = pd.read_parquet( PREPROCESSED_DATA_DIR / 'full_data_2000_2005.parquet')
-    
-    df_filtered = df.copy()
+    local_file = PREPROCESSED_DATA_DIR / 'full_data_2000_2005.parquet'
+    if not local_file.exists():
+        try:
+            download_parquet_dataset()
+        except:
+            raise Exception('Failed to download preprocessed data (Parquet file)')
+    else:
+        print('File on preprocessed data already exists')
+
+    df_filtered = pd.read_parquet(local_file)
     
     years_shift = 23  # how many years to go back in time
 
