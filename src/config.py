@@ -15,8 +15,6 @@ FEATURE_GROUP_NAME = 'transactions_with_rfm_feature_group'
 FEATURE_GROUP_VERSION = 2
 
 FEATURE_GROUP_METADATA = FeatureGroupConfig(
-    name='time_series_hourly_feature_group',
-    version=FEATURE_GROUP_VERSION,
     name=FEATURE_GROUP_NAME,
     version=FEATURE_GROUP_VERSION,
     description="Transaction data with RFM features at hourly frequency",
