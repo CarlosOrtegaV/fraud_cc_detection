@@ -14,21 +14,44 @@ def create_masks_data_split_per_months(
                      validation_ratio: float=0.2,
                      expanding_window: bool=True,
                      ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Split a DataFrame into training and validation sets using an expanding window per months.
-    
-    Args:
-        df {pd.DataFrame}: The DataFrame to be split.
-        n_splits {int, optional}: The number of splits to be performed. Defaults to 10.
-        offset_trainval {int, optional}: The number of months to be used for the training and validation sets. Defaults to 0.
-        validation_ratio {float, optional}: The ratio of validation data to be used. Defaults to 0.2.
-        expanding_window {bool, optional}: Whether to use an expanding window or not. Defaults to True.
-        
+    """
+    Split the data into training, validation, and test sets based on months.
+
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        The input DataFrame containing the data.
+    n_splits : int, optional
+        The number of splits to create, default is 10.
+    offset_trainval : int, optional
+        The offset for the last month of the training and validation sets, default is 0.
+    offset_test : int, optional
+        The offset for the last month of the test set, default is 1.
+    validation_ratio : float, optional
+        The ratio of the validation set size to the training set size, default is 0.2.
+    expanding_window : bool, optional
+        Whether to use an expanding window for creating the training sets, default is True.
+
     Returns:
-        {Tuple[np.ndarray, np.ndarray]}: A tuple containing the training and validation sets as numpy arrays.
-        
-    Raises:
-        AssertionError: If the number of splits is not between 2 and 10.
-        AssertionError: If the data is not from a single year.
+    --------
+    masks_train : np.ndarray
+        An array of masks indicating the training set for each split.
+    masks_val : np.ndarray
+        An array of masks indicating the validation set for each split.
+    masks_test : np.ndarray
+        An array of masks indicating the test set for each split.
+    """
+    # Function code goes here
+def create_masks_data_split_per_months(
+                     df: pd.DataFrame, 
+                     n_splits: int=10,
+                     offset_trainval: int=0,
+                     offset_test: int=1,
+                     validation_ratio: float=0.2,
+                     expanding_window: bool=True,
+                     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    
     """
     assert offset_test > 0, 'The offset for the test set must be greater than 0.'
     assert (n_splits > 1) & (n_splits <= 10), 'Number of splits must be between 2 and 10.' 

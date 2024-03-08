@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from src.feature_store_api import FeatureGroupConfig
+from src.feature_store_api import FeatureGroupConfig, FeatureViewConfig
 from src.paths import PARENT_DIR
 
 load_dotenv(PARENT_DIR / '.env')
@@ -11,9 +11,10 @@ try:
 except:
     raise Exception('Create a .env file on project root with HOPSWORKS_API_KEY.')
 
-FEATURE_GROUP_NAME = 'transactions_with_rfm_feature_group'
-FEATURE_GROUP_VERSION = 2
 
+# Feature Store Backfilling
+FEATURE_GROUP_NAME = 'transactions_with_rfm_feature_group'
+FEATURE_GROUP_VERSION = 1
 FEATURE_GROUP_METADATA = FeatureGroupConfig(
     name=FEATURE_GROUP_NAME,
     version=FEATURE_GROUP_VERSION,
@@ -22,3 +23,13 @@ FEATURE_GROUP_METADATA = FeatureGroupConfig(
     event_time='full_date_unix',
     online_enabled=True,
 )
+
+FEATURE_VIEW_NAME = 'transactions_with_rfm_feature_feature_view'
+FEATURE_VIEW_VERSION = 2
+FEATURE_VIEW_METADATA = FeatureViewConfig(
+    name=FEATURE_VIEW_NAME,
+    version=FEATURE_GROUP_VERSION,
+    feature_group=FEATURE_GROUP_METADATA,
+)
+
+MODEL_NAME = "fraud_detector"
