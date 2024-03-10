@@ -25,7 +25,6 @@ def run(date: datetime):
     # we fetch raw data for the last 1 week, to add redundancy to our data pipeline, 
     # if the pipeline fails for some reason,
     # we can still re-write data for that missing hour in a later run.
-
     batch_df_ = fetch_batch_data(
         from_date=(date - timedelta(weeks=1)),
         to_date=date
@@ -35,19 +34,11 @@ def run(date: datetime):
     logger.info('Getting pointer to the feature group we wanna save data to')
     feature_group = get_or_create_feature_group(config.FEATURE_GROUP_METADATA)
 
-    # start a job to insert the data into the feature group
-    # we wait, to make sure the job is finished before we exit the script, and
-    # the inference pipeline can start using the new data
+    # Insert data into the feature group
     logger.info('Starting job to insert data into feature group...')
     feature_group.insert(batch_df_, write_options={"wait_for_job": False})
-    # feature_group.insert(ts_data, write_options={"start_offline_backfill": False})
     
     logger.info('Finished job to insert data into feature group')
-
-    # logger.info('Sleeping for 5 minutes to make sure the inference pipeline has time to run')
-    # import time
-    # time.sleep(5*60)
-
 
 if __name__ == '__main__':
 

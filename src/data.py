@@ -141,6 +141,7 @@ def preprocess_data(
     df['afternoon'] = df['hour'].apply(lambda x: True if (x >= 12) & (x < 18) else False)
     df['full_date'] = pd.to_datetime(df[['year', 'month', 'day','hour','minute']])
     df['full_date_unix'] = df['full_date'].apply(lambda x: int(datetime.timestamp(x) * 1000))
+    df['id_amount'] = df['amount'].apply(lambda x: int(x*100))
     # Filter out transactions with non-positive amounts and drop columns
 
     df.drop(drop_cols, axis=1, inplace=True)
@@ -170,7 +171,7 @@ def preprocess_data(
 def download_raw_dataset() -> Path:
     """Download the IBM fraud dataset from Dropbox and save it to the local directory."""
     
-    URL = 'https://www.dropbox.com/scl/fi/mn09ew3r0bbydw8kmnvy6/creditcard_altman.csv?rlkey=dpj4s0bmkubu5uqifdpfy3bow&dl=1'
+    URL = 'https://www.dropbox.com/scl/fi/z2948o2aigfj23gmn7uej/ibm_fraud_cc.parquet?rlkey=nshgc527vyeszkugydne9pxcz&dl=1'
     response = requests.get(URL)
     if response.status_code == 200:
         path = Path(RAW_DATA_DIR / 'ibm_fraud_cc.parquet')

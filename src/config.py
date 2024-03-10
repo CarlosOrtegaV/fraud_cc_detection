@@ -19,7 +19,7 @@ FEATURE_GROUP_METADATA = FeatureGroupConfig(
     name=FEATURE_GROUP_NAME,
     version=FEATURE_GROUP_VERSION,
     description="Transaction data with RFM features at hourly frequency",
-    primary_key = ['full_date_unix','user','amount'],
+    primary_key = ['full_date_unix','user','id_amount'],
     event_time='full_date_unix',
     online_enabled=True,
 )
