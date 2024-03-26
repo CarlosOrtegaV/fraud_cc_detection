@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 from sklearn.metrics import average_precision_score, precision_score, recall_score
-from xgboost import XGBClassifier
 import optuna
 
 from src import config

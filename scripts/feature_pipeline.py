@@ -54,7 +54,7 @@ if __name__ == '__main__':
     if args.datetime:
         current_date = pd.to_datetime(args.datetime)
     else:
-        current_date = pd.to_datetime(datetime.utcnow()).floor('H')
+        current_date = pd.to_datetime('2001-01-01')
     
     logger.info(f'Running feature pipeline for {current_date=}')
     run(current_date)
