@@ -33,3 +33,10 @@ FEATURE_VIEW_METADATA = FeatureViewConfig(
 )
 
 MODEL_NAME = "fraud_detector"
+
+# Hyperparameter search
+N_HYPERPARAMETER_SEARCH_TRIALS = 10
+
+# Minimum recall for the model based on the assumed fraud investigation efficiency P(y=1|l=1) = 1/5
+# P(l=1)/P(y=1) ~~ 1, and the bayes' theorem P(l=1|y=1) ~~ P(y=1|l=1)
+MIN_RECALL = 0.20

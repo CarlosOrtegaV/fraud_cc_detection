@@ -19,6 +19,7 @@ python-dotenv = "^1.0.0"
 streamlit = "^1.27.2"
 tomlkit = "^0.12.4"
 fire = "^0.5.0"
+discordwebhook = "^1.0.3"
 
 
 [build-system]

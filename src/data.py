@@ -155,7 +155,6 @@ def preprocess_data(
     
     # Calculate 90 days before the first day of the year
     start_date = first_day_year - timedelta(days=90)
-
     
     mask = (df['date'] >= start_date) & (df['date'] <= end_date)
     df = df.loc[mask]
@@ -209,11 +208,9 @@ def fetch_batch_data(
         print('File on preprocessed data already exists')
 
     df_filtered = pd.read_parquet(local_file)
-    
-    years_shift = 23  # how many years to go back in time
 
-    fetch_data_to_ = to_date.replace(year=to_date.year - years_shift)
-    fetch_data_from_ = from_date.replace(year=from_date.year - years_shift)
+    fetch_data_to_ = to_date.replace(year=to_date.year)
+    fetch_data_from_ = from_date.replace(year=from_date.year)
     print(f'{fetch_data_from_=}, {fetch_data_to_=}')
     
     

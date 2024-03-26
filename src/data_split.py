@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from typing import List, Tuple, Optional
 import calendar
 
-from tomlkit import date
-
 def create_masks_data_split_per_months(
                      df: pd.DataFrame, 
                      n_splits: int=10,
@@ -41,18 +39,7 @@ def create_masks_data_split_per_months(
     masks_test : np.ndarray
         An array of masks indicating the test set for each split.
     """
-    # Function code goes here
-def create_masks_data_split_per_months(
-                     df: pd.DataFrame, 
-                     n_splits: int=10,
-                     offset_trainval: int=0,
-                     offset_test: int=1,
-                     validation_ratio: float=0.2,
-                     expanding_window: bool=True,
-                     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    
-    """
+
     assert offset_test > 0, 'The offset for the test set must be greater than 0.'
     assert (n_splits > 1) & (n_splits <= 10), 'Number of splits must be between 2 and 10.' 
     assert np.unique(df['date'].dt.year).shape[0] == 1, 'The data must be from a single year.'
@@ -70,7 +57,7 @@ def create_masks_data_split_per_months(
         list_train_set_first_day = [datetime(year, starting_month + i - 1, 1) for i in range(1, n_splits+1)]
     
     trainval_set_last_month = starting_month + offset_trainval
-    test_set_last_month = starting_month + offset_trainval
+    # test_set_last_month = starting_month + offset_trainval
     
     list_trainval_set_last_day = [datetime(year, 
                                            trainval_set_last_month + (1 + offset_test)*(i - 1), 
@@ -87,9 +74,7 @@ def create_masks_data_split_per_months(
         
         val_days = int(np.round(time_gap.days*validation_ratio))
         val_set_first_day = list_trainval_set_last_day[i] - timedelta(days=val_days)
-        list_val_set_first_day.append(val_set_first_day)
-    
-    
+        list_val_set_first_day.append(val_set_first_day)    
             
     # Create a list to store the training and validation sets
     list_mask_train = []
